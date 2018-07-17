@@ -1,7 +1,7 @@
 from pathlib import Path
 from setuptools import setup
 
-with open('README.rst') as fd:
+with open('README.md') as fd:
     DESCRIPTION = fd.read()
 
 CLASSIFIERS = [
