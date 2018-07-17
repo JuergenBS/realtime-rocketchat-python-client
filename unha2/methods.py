@@ -49,6 +49,16 @@ async def login_sha256(ws, holder: AsyncHolder, username: str, password: str) ->
     else:
         raise MethodError(result)
 
+async def login_ldap(ws, holder: AsyncHolder, username: str, password: str) -> dict:
+    uid = uuid()
+    payload = build.methods.login_ldap(uid, username, password)
+    result = await holder.send_method(ws, uid, payload)
+    data = result.get('result')
+    if data:
+        return parse.result.login(result['result'])
+    else:
+        raise MethodError(result)
+
 async def login_resume(ws, holder: AsyncHolder, token: str) -> dict:
     uid = uuid()
     payload = build.methods.login_resume(uid, token)

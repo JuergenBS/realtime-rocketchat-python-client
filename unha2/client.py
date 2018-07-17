@@ -62,6 +62,19 @@ class ClientAPI:
         self._data.user_id = res['user_id']
         return res
 
+    async def login_ldap(self):
+        username, password = self._data.credentials()
+        res = await methods.login_ldap(
+            self._ws(),
+            self._holder,
+            username,
+            password,
+        )
+        self._data.token = res['token']
+        self._data.token_expires = res['expires']
+        self._data.user_id = res['user_id']
+        return res
+
     async def join_room(self, room_id, join_code=None):
         return await methods.join_room(self._ws(), self._holder, room_id, join_code=join_code)
 

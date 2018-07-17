@@ -17,6 +17,20 @@ def login_sha256(uid: str, username: str, password: str) -> dict:
     }
     return msg
 
+def login_ldap(uid: str, username: str, password: str) -> dict:
+    msg = {
+        'msg': 'method',
+        'method': 'login',
+        'id': uid,
+        'params': [{
+            'username': username,
+            'ldapPass': password,
+            'ldap': 'true',
+            'ldapOptions': {}
+        }]
+    }
+    return msg
+
 def login_resume(uid: str, token: str) -> dict:
     msg = {
         'msg': 'method',
