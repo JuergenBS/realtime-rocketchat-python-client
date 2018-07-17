@@ -35,11 +35,11 @@ class ClientAPI:
         self._ws = ws
         self._holder: AsyncHolder = holder
 
-    def connect(self):
-        sock.send(self._ws(), build.misc.connect())
+    async def connect(self):
+        await sock.send(self._ws(), build.misc.connect())
 
-    def send_pong(self):
-        sock.send(self._ws(), build.misc.pong())
+    async def send_pong(self):
+        await sock.send(self._ws(), build.misc.pong())
 
     def send_msg(self, room_id: str, text: str):
         asyncio.ensure_future(methods.send_message(
@@ -146,9 +146,9 @@ class Client:
                 continue
             msgtype = parse.base.msg_type(msg)
             if msgtype == RawMessageType.NONE:
-                self.do_connect()
+                await self.do_connect()
             elif msgtype == RawMessageType.PING:
-                self.api.send_pong()
+                await self.api.send_pong()
             elif msgtype == RawMessageType.CONNECTED:
                 self.session = parse.connected.parse(msg)['session']
                 asyncio.ensure_future(self.do_login())
@@ -165,8 +165,8 @@ class Client:
     async def do_login(self):
         await self.api.login()
 
-    def do_connect(self):
-        self.api.connect()
+    async def do_connect(self):
+        await self.api.connect()
 
 
 class EventClient(Client):

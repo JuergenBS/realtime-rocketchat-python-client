@@ -15,7 +15,7 @@ class AsyncHolder:
     async def send_sub(self, ws, uid: str, msg: Mapping):
         fut: asyncio.Future = asyncio.Future()
         self.awaited_subs[uid] = fut
-        sock.send(ws, msg)
+        await sock.send(ws, msg)
         return await fut
 
     def send_sub_noblock(self, ws, uid: str, msg: Mapping, callback=None):
@@ -28,7 +28,7 @@ class AsyncHolder:
     async def send_method(self, ws, uid, msg):
         fut = asyncio.Future()
         self.awaited_methods[uid] = fut
-        sock.send(ws, msg)
+        await sock.send(ws, msg)
         return await fut
 
     def send_method_noblock(self, ws, uid: str, msg: Mapping, callback=None):

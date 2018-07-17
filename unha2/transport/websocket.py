@@ -7,9 +7,9 @@ from .. common import dumbs, undumbs
 
 log = logging.getLogger(__name__)
 
-def send(ws, payload):
+async def send(ws, payload):
     log.debug('SEND %s', payload)
-    ws.send_str(dumbs(payload))
+    await ws.send_str(dumbs(payload))
 
 def _empty(msg):
     pass
@@ -17,7 +17,7 @@ def _empty(msg):
 def _empty_close(msg):
     raise StopAsyncIteration
 
-async def ws_loop(ws,):
+async def ws_loop(ws):
     async for msg in ws:
         if msg.type == aiohttp.WSMsgType.TEXT:
             char = msg.data[0]
