@@ -1,6 +1,6 @@
 import enum
 
-from ..model.base import User, RoomType, RoomMessage, ChangedStreamMessage
+from ..model.base import User, RoomType, RoomMessage, ChangedStreamMessage, NotifyUser
 from .. common import ts
 
 def _empty(msg):
@@ -52,6 +52,10 @@ def notify_user(msg):
     event_name = msg['fields']['eventName']
     event = event_name.split('/')[1]
     args = msg['fields']['args']
+    return {
+        'type': NotifyUser(event),
+        'args': args
+    }
 
 def rooms_changed(args):
     type_ = args[0]

@@ -40,6 +40,10 @@ class ChangedStreamMessage(enum.Enum):
     ROOM_MESSAGES = 'stream-room-messages' # main room events
 
 class NotifyUser(enum.Enum):
+    MESSAGE = 'message'
+    OTR = 'otr'
+    WEBRTC = 'webrtc'
+    NOTIFICATION = 'notification'
     ROOMS_CHANGED = 'rooms-changed'
     SUBSCRIPTIONS_CHANGED = 'subscriptions-changed'
 

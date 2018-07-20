@@ -9,7 +9,7 @@ import unha2.parse as parse
 import unha2.methods as methods
 import unha2.subscriptions as subscriptions
 import unha2.transport.websocket as sock
-from unha2.model.base import RawMessageType, ChangedStreamMessage, RoomMessage
+from unha2.model.base import RawMessageType, ChangedStreamMessage, RoomMessage, NotifyUser
 from unha2.holder import AsyncHolder
 
 
@@ -278,11 +278,22 @@ class OverrideClient(Client):
         if msg_type == ChangedStreamMessage.USERS:
             await self.on_users(msg)
         elif msg_type == ChangedStreamMessage.NOTIFY_USER:
-            await self.on_notify_user(msg)
+            await self.on_notify_user(parse.changed.notify_user(msg))
         elif msg_type == ChangedStreamMessage.NOTIFY_ROOM:
             await self.on_notify_room(msg)
         elif msg_type == ChangedStreamMessage.ROOM_MESSAGES:
             await self.on_room_message(parse.changed.room_message(msg))
+
+    def on_notify_user(self, msg):
+        notify_user_dispatch = {
+            NotifyUser.MESSAGE: self.on_message,
+            NotifyUser.OTR: self.on_otr,
+            NotifyUser.WEBRTC: self.on_webrtc,
+            NotifyUser.NOTIFICATION: self.on_notification,
+            NotifyUser.ROOMS_CHANGED: self.on_rooms_changed,
+            NotifyUser.SUBSCRIPTIONS_CHANGED: self.on_subscriptions_changed
+        }
+        return notify_user_dispatch[msg['type']](msg)
 
     def on_room_message(self, msg):
         room_dispatch = {
@@ -303,11 +314,10 @@ class OverrideClient(Client):
     async def on_users(self, msg):
         pass
 
-    async def on_notify_user(self, msg):
-        pass
-
     async def on_notify_room(self, msg):
         pass
+
+    # on_room_message
 
     def on_user_joined(self, msg):
         pass
@@ -339,3 +349,22 @@ class OverrideClient(Client):
     def on_topic_changed(self, msg):
         pass
 
+    # on_notify_user
+
+    async def on_message(self, msg):
+        pass
+
+    async def on_otr(self, msg):
+        pass
+
+    async def on_webrtc(self, msg):
+        pass
+
+    async def on_notification(self, msg):
+        pass
+
+    async def on_rooms_changed(self, msg):
+        pass
+
+    async def on_subscriptions_changed(self, msg):
+        pass
