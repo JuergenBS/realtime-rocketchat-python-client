@@ -9,8 +9,8 @@ import unha2.parse as parse
 import unha2.methods as methods
 import unha2.subscriptions as subscriptions
 import unha2.transport.websocket as sock
-from unha2.model.base import RawMessageType, ChangedStreamMessage, RoomMessage, NotifyUser
-from unha2.holder import AsyncHolder
+from unha2.model.base import RawMessageType, ErrorType, ChangedStreamMessage, RoomMessage, NotifyUser
+from unha2.holder import AsyncHolder, ServerException
 
 
 class ClientData:
@@ -161,12 +161,12 @@ class Client:
             if msgtype == RawMessageType.NONE:
                 asyncio.ensure_future(self.do_connect())
             elif msgtype == RawMessageType.PING:
-                asyncio.ensure_future(self.api.send_pong())
+                asyncio.ensure_future(self.send_pong())
             elif msgtype == RawMessageType.CONNECTED:
                 self.session = parse.connected.parse(msg)['session']
                 asyncio.ensure_future(self.do_login())
             elif msgtype == RawMessageType.RESULT:
-                self._holder.recv_result(msg)
+                self.on_result(msg)
             elif msgtype == RawMessageType.READY:
                 self._holder.recv_ready(msg)
             else:
@@ -175,12 +175,23 @@ class Client:
     async def parse(self, msg, msgtype):
         raise NotImplementedError
 
+    async def on_error(self, errortype, error_result, recover_message):
+        raise NotImplementedError
+
     async def do_login(self):
         await self.api.login()
+
+    async def send_pong(self):
+        await self.api.send_pong()
 
     async def do_connect(self):
         self.api.connect()
 
+    def on_result(self, msg):
+        try:
+            self._holder.recv_result(msg)
+        except ServerException as e:
+            asyncio.ensure_future(self.on_error(e.error_message, e.error_result, e.recover_message))
 
 class EventClient(Client):
     def __init__(self, server, username, password):
@@ -368,3 +379,14 @@ class OverrideClient(Client):
 
     async def on_subscriptions_changed(self, msg):
         pass
+
+    async def on_error(self, errortype, error_result, recover_message):
+        if errortype == ErrorType.TOO_MANY_REQUESTS.value:
+            await self.on_too_many_requests(error_result, recover_message)
+
+    async def on_too_many_requests(self, error_result, recover_message):
+        timeout = int(error_result['error']['details']['timeToReset']) * 0.001
+        await asyncio.sleep(timeout)
+        room_id = recover_message['rid']
+        text = recover_message['msg']
+        self.api.send_msg(room_id, text)

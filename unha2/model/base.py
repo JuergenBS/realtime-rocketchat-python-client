@@ -32,6 +32,9 @@ class RoomMessage(enum.Enum):
     REMOVE = 'rm'
     NORMAL_MESSAGE = ''
 
+class ErrorType(enum.Enum):
+    TOO_MANY_REQUESTS = 'too-many-requests'
+
 class ChangedStreamMessage(enum.Enum):
     NONE = ''
     USERS = 'users'
